@@ -526,7 +526,7 @@ Invoke skill: Skill(skill-name)
 
 `Task → Task` nesting is forbidden by recursion blocker. Multi-phase workflows need clean separation of concerns.
 
-Use single Task with inline skills for multi-phase workflows. **CUSTOM** (Empirical finding: `Skill(context: fork)` runs inline with context isolation—does not spawn true subagents, allowing chained forked skills).
+Use single Task with skills for multi-phase workflows. Note: `Skill(context: fork)` spawns a subagent with an isolated context (i.e., a true subagent) when used with an `agent:`; chained forked skills are observed to be supported but should be treated as experimental. `Task → Task` nesting remains forbidden.
 
 **[FINDING]**
 

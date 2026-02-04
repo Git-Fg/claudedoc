@@ -211,7 +211,7 @@ description: What it does. Use when user asks to [specific phrases].
 * **model:** Model override
 * **hooks:** Event-driven automation
 
-> **Note**: The official Anthropic specification only requires `name` and `description`. Other fields like `license`, `compatibility`, and `metadata` are community extensions. Fields like `context`, `agent`, `user-invokable`, and `disable-model-invocation` are Claude Code extensions not part of the base Agent Skills Standard.
+> **Note**: The Agent Skills standard requires `name` and `description` and also recognizes `license` as a schema field (see https://agentskills.io/specification). Fields such as `context`, `agent`, `user-invocable`, and `disable-model-invocation` are Claude Code extensions not part of the base Agent Skills Standard. Some fields (e.g., `allowed-tools`) are experimental and may vary across implementations.
 
 #### Security restrictions:
 * Forbidden to use "claude" or "anthropic" in skill names

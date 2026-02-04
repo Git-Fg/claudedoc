@@ -72,7 +72,7 @@ This document covers **forked-context primitives** (Tasks) and the **Agent compo
 Main → Task(subagent)      → Isolated context, true subagent spawn
 Main → Skill(skill)        → Inline, shares context
 Task → Skill(skill)        → Allowed, subagent invokes inline skill
-Skill(fork) → Skill(fork)  → ALLOWED (isolated context, not subagent spawn)
+Skill(fork) → Skill(fork)  → ALLOWED (spawns isolated subagents; observed pattern but experimental)
 Skill(fork) → Task(agent)  → FORBIDDEN (still blocks recursion)
 
 Task → Task(subagent)      → FORBIDDEN (recursion blocker)
@@ -152,6 +152,31 @@ When Claude sees this phrase, it immediately considers:
 
 **[FINDING]** Warning:
 `context: fork` only makes sense for skills with explicit instructions. If your skill contains guidelines like "use these API conventions" without a task, the subagent receives guidelines but no actionable prompt.
+
+### Example: Deep Codebase Exploration via Subagents
+
+This example documents a pattern for spawning multiple `Explore` subagents to analyze a large repository and aggregate structured results. It is a documentation-only pattern and implementers should validate behavior on their target platform.
+
+**Frontmatter (example)**:
+```yaml
+---
+name: explore-deep
+context: fork
+agent: Explore
+permissionMode: plan
+hooks:
+  SubagentStop:
+    - command: /internal/collect-subagent-output
+---
+```
+
+**Pattern Steps**:
+1. Main agent triggers `Skill(explore-deep)` with root path and `thoroughness: very_thorough`.
+2. Explore subagents spawn per directory (read-only) and produce structured outputs (file lists, TODOs, security findings, metrics).
+3. `SubagentStop` hooks gather outputs; main agent aggregates summaries and generates action items.
+4. If edits are required, use `acceptEdits` or `bypassPermissions` cautiously.
+
+> **Note**: This is a docs pattern; actual runtime semantics and hook payloads should be validated and tested on the actual platform.
 
 ### Agent Types for Tasks
 

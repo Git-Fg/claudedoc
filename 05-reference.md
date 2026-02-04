@@ -48,7 +48,7 @@ model: sonnet                 # Optional: model override
 ---
 ```
 
-> **Note**: `license` field is a community extension, not official Anthropic documentation.
+> **Note**: The `license` field is part of the Agent Skills standard (see https://agentskills.io/specification). The `allowed-tools` field is experimental and its enforcement may vary across implementations; prefer explicit deny rules or `disallowedTools` for strict enforcement.
 
 **Agent Frontmatter**:
 ```yaml
@@ -86,6 +86,8 @@ skill-name/
 
 #### Skill/Command Frontmatter Fields
 
+> **Note**: The `license` field is part of the Agent Skills standard (https://agentskills.io/specification). The `allowed-tools` field is experimental—its enforcement may be inconsistent across platforms.
+
 | Field | Type | Required | Purpose |
 |:------|:-----|:---------|:--------|
 | `name` | string | No (uses dir name) | Component identifier (max 64 chars) |
@@ -98,7 +100,7 @@ skill-name/
 | `argument-hint` | string | No | Hint for expected arguments during autocomplete |
 | `hooks` | object | No | Event-driven automation |
 
-> **Note**: `license` and `allowed-tools` are community extensions, not official Anthropic documentation.
+> **Note**: The `license` field is part of the Agent Skills standard (https://agentskills.io/specification). The `allowed-tools` field is experimental—its enforcement may be inconsistent across platforms.
 
 #### Agent Frontmatter Fields
 
@@ -311,9 +313,7 @@ matcher: "Bash"               # Filter events
 
 **Manager Pattern** [FINDING] - Orchestration pattern with automatic retry: `Main → Skill(manager) → Task(create) → Skill(auditor, fork) → [retry if fail] → Main`.
 
-**Chain of Experts** [FINDING] - Multi-phase workflow exploiting recursion loophole: `Skill(fork) → Skill(fork)` (allowed, unlike `Task → Task`).
-
-**Recursion Loophole** [FINDING] - `Skill(context: fork)` runs inline with context isolation (not true subagent spawn), allowing chained forked skills unlike forbidden `Task → Task`.
+**Chained Forked Skills** [FINDING] - Multi-phase workflow pattern: `Skill(fork) → Skill(fork)` (observed to work; unlike `Task → Task`, which is forbidden). Each forked skill spawns an isolated subagent context; while chaining is observed, this pattern should be treated as experimental and validated per-platform rather than relied upon to bypass core constraints.
 
 **Loadout Agent** [FINDING] - Agent with bundled skills via `skills:` field. Creates consistent worker with same capabilities every spawn.
 
@@ -362,12 +362,12 @@ Encode goals, constraints, success criteria, and examples rather than micromanag
 
 Use `Task(work)` + `Skill(auditor, context: fork)` with automatic retry on failure. Auditor sees only draft, not implementation attempts—enabling objective validation.
 
-### Chain of Experts via Recursion Loophole
+### Chained Forked Skills (experimental)
 
 **Status**: [FINDING] Accepted
 **Impact**: Multi-phase workflows possible
 
-`Task → Task` nesting is forbidden. **[FINDING]**: `Skill(context: fork)` runs inline with context isolation (not true subagent), allowing `Skill(fork) → Skill(fork)` chaining.
+`Task → Task` nesting is forbidden. **[FINDING]**: `Skill(context: fork)` spawns a subagent with an isolated context (true subagent behavior), allowing `Skill(fork) → Skill(fork)` chaining. This pattern is observed but should be treated as experimental and validated per-platform rather than relied upon to bypass core constraints.
 
 ### Progressive Disclosure
 
@@ -482,6 +482,12 @@ Long introduction text...
 ```
 
 ---
+
+## Roadmap & Future Work
+
+- Add frontmatter schema & validators (validate types, required combos such as `agent` when `context: fork`).
+- Add unit & integration tests for `Task()` vs `Skill(context: fork)` semantics and hook lifecycle events (`SubagentStart` / `SubagentStop`).
+- Add CI workflows to run docs checks, frontmatter validators, and tests to prevent regressions.
 
 ## Content Badge Legend
 

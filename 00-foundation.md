@@ -411,9 +411,9 @@ The context topology primitives give you surgical control over this:
 **✓ VERIFIED** (Source: https://code.claude.com/docs/en/sub-agents)
 
 - `Task → Task` nesting is **FORBIDDEN** (recursion blocker)
-- `Skill(fork) → Skill(fork)` is **ALLOWED** (context isolation, not subagent spawn)
+- `Skill(fork) → Skill(fork)` is **ALLOWED** (spawns isolated subagents; observed pattern but experimental)
 
-**⚠️ IMPORTANT**: The chain of forked skills (`Skill(fork) → Skill(fork) → Skill(fork)`) **does work reliably** and is a fundamental pattern for multi-phase validation. This is **context isolation**, not subagent spawning, which is why it bypasses the Task→Task recursion constraint. Each forked skill runs inline with isolated context but can pass information bidirectionally.
+**⚠️ IMPORTANT**: The chain of forked skills (`Skill(fork) → Skill(fork) → Skill(fork)`) **does work reliably** and is a fundamental pattern for multi-phase validation. Each forked skill spawns a subagent with an isolated context (does not inherit parent history) and can pass information bidirectionally. When an `agent:` is specified, the skill runs inside that agent environment. Chained forked skills are observed to work but should be treated as experimental and not relied upon to bypass core recursion constraints.
 
 **Use this pattern when**: You need chained validation (create → validate → refine) without spawning true subagents. The forked context ensures each phase sees only what it needs, preventing bias from earlier attempts.
 
@@ -439,7 +439,7 @@ The Multi-Phase Delegation pattern creates **true clean rooms**:
 
 **Concrete example of what goes wrong without isolation**: You write a complex algorithm. It takes you 5 attempts to get it right. You then ask an inline auditor (shared context) to review it. The auditor sees your struggle—"Attempt 1 failed with edge case X, Attempt 2 failed with edge case Y..."—and unconsciously lowers their standards. They think "well, given how hard this was, the current implementation is pretty good." They miss a critical bug because they're compensating for perceived difficulty. A forked verifier would have caught the bug immediately because they see only the code, not the struggle.
 
-**⚠ CUSTOM** (Empirical finding): Skill(context: fork) runs inline with context isolation, allowing chained invocations with bidirectional information flow.
+**⚠ CUSTOM** (Empirical finding): `Skill(context: fork)` spawns a subagent with an isolated context (true subagent behavior) when used with `agent:`. Chained forked skills are observed to chain but are experimental; implementers should validate behavior on their platform.
 
 ---
 
@@ -662,7 +662,7 @@ This creates a **closed feedback loop** where the verifier references the origin
 
 | Anti-Pattern | Why Bad | Instead |
 |:-------------|:--------|:--------|
-| `Task → Task` nesting | Forbidden by recursion blocker | Use `Skill(fork) → Skill(fork)` (context isolation, not subagent) |
+| `Task → Task` nesting | Forbidden by recursion blocker | Use `Skill(fork) → Skill(fork)` (spawns isolated subagents; chaining observed but experimental) |
 | Inline auditors | See retry history, biased | Use `Skill(auditor, context: fork)` |
 | Monolithic CLAUDE.md | Hard to maintain, survive compaction | Use `.claude/rules/*.md` for modular rules |
 | Scattered references | Agents won't hunt for info | Put core knowledge in SKILL.md |
@@ -1248,7 +1248,7 @@ Permission rules are evaluated in order: **deny → ask → allow**. The first m
 Main → Task(subagent)      → Isolated context, true subagent spawn
 Main → Skill(skill)        → Inline, shares context
 Task → Skill(skill)        → Allowed, subagent invokes inline skill
-Skill(fork) → Skill(fork)  → ALLOWED (isolated context, not subagent spawn)
+Skill(fork) → Skill(fork)  → ALLOWED (spawns isolated subagents; observed pattern but experimental)
 Skill(fork) → Task(agent)  → FORBIDDEN (still blocks recursion)
 
 Task → Task(subagent)      → FORBIDDEN (recursion blocker)

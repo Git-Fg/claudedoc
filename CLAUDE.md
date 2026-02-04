@@ -24,31 +24,6 @@ This directory is the **knowledge preservation system** for the thecattoolkit_v3
 - Pattern library with proven implementations
 - Can be copied to any new project and work standalone
 
-### Key Documents
-
-| File | Purpose |
-|------|---------|
-| `00-foundation.md` | Philosophy, patterns, ecosystem, primitives overview - start here for first principles |
-| `01-skills-context.md` | Skill primitive + Commands component (context-based: shared memory, @/! injection) |
-| `02-subagents.md` | Task primitive + Agents component (forked-context: subagents, heavy lifting) |
-| `03-hooks-specific.md` | Hooks + MCP components (event-driven security, external capabilities) |
-| `04-practices.md` | Workflows, quality gates, writing guidelines, anti-patterns (how-to across lifecycle) |
-| `05-reference.md` | Quick lookup tables, key terms, decisions, findings (reference material) |
-| `official-claude-skills-guide.md` | **[ANTHROPIC OFFICIAL]** Comprehensive 25-page PDF guide converted in md from resources.anthropic.com |
-| `REORG_SPEC.md` | Migration specification and execution plan for this reorganization |
-
-### Core Philosophy: Autonomy-First (2026)
-
-**Paradigm shift from 2024 → 2026:**
-
-| Old Way (2024) | New Way (2026) |
-|----------------|----------------|
-| Carefully constrain agents | Trust agents by default |
-| List forbidden actions | State objectives and alternatives |
-| Rigid step-by-step scripts | Autonomous decision-making |
-| Magic syntax/formatting | Natural language |
-| Micromanage operations | Reactive constraints only |
-
 **Key insight:** Over-constraining agents causes more failures than under-constraining. Modern models follow instructions precisely without micromanagement.
 
 ### Quick Reference Patterns
@@ -64,7 +39,7 @@ This directory is the **knowledge preservation system** for the thecattoolkit_v3
 
 **Multi-Phase Delegation:** (⚠ CUSTOM pattern, uses official features)
 - Subagent constraint: `Task → Task` forbidden (true subagent nesting)
-- **⚠ CUSTOM** (Empirical finding): `Skill(context: fork)` runs inline with context isolation—does not spawn subagents, allowing chained forked skills
+- **⚠ CUSTOM** (Empirical finding): `Skill(context: fork)` spawns a subagent with an isolated context—does not inherit parent history. Chained forked skills are observed but should be treated as experimental and validated on target platforms.
 - Use single Task with inline skills OR chained forked skills for multi-phase workflows
 - Enables unbiased validation through isolated contexts
 
@@ -80,33 +55,6 @@ The `sav/` directory is the core intellectual property - the accumulated knowled
 
 ---
 
-## Reading Flow
-
-**New to the project? Start here:**
-
-```
-START HERE
-    ↓
-00-foundation.md (first principles, what exists, how to think, why)
-    ↓
-    ├─→ 01-skills-context.md (if building context-based components)
-    ├─→ 02-subagents.md (if building forked-context components)
-    └─→ 03-hooks-specific.md (if using hooks or MCP)
-    ↓
-04-practices.md (how to design, create, verify, maintain)
-    ↓
-05-reference.md (lookup when needed)
-```
-
-**Need something specific? Jump directly:**
-- Understanding context modes → 00-foundation.md → Primitives Overview
-- Building a Skill → 01-skills-context.md → Skill Primitive
-- Creating a Command → 01-skills-context.md → Commands Component
-- Using subagents → 02-subagents.md → Task Primitive
-- Quality verification → 04-practices.md → Verify Phase
-
----
-
 ## Content Attribution
 
 Documentation uses inline badges to indicate source:
@@ -114,11 +62,3 @@ Documentation uses inline badges to indicate source:
 - `[ANTHROPIC]` - Official Anthropic resources (resources.anthropic.com)
 - `[COMMUNITY]` - Best practices from community/Platform docs
 - `[FINDING]` - Personal research findings and empirical discoveries
-
----
-
-## Migration Status
-
-**Completed**: Migration from 17-file structure to 6-file consolidated structure (2026-02-01).
-
-Old files archived in `archive/old-structure/`. See `REORG_SPEC.md` for migration specification.
