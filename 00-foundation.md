@@ -25,6 +25,7 @@ graph TD
    - [Project Mission](#project-mission)
    - [Philosophy: Autonomy-First (2026)](#philosophy-autonomy-first-2026)
    - [The Delta Principle](#the-delta-principle)
+   - [Philosophy: Less is More](#philosophy-less-is-more)
    - [Philosophy: Simplicity as Sophistication](#philosophy-simplicity-as-sophistication)
    - [Philosophy: AI Agents Are Smart and Lazy](#philosophy-ai-agents-are-smart-and-lazy)
    - [Success Criteria](#success-criteria)
@@ -168,6 +169,25 @@ This creates a pernicious failure mode: the agent sees a 2000-line skill file an
 
 **Concrete example**: A skill that teaches "how to write React components" (obvious) followed by "we use styled-components with a specific theme object structure" (critical). The agent skims the file, sees mostly familiar React content, and misses the theme object requirement. It writes components using inline styles, violating your standards. Without the noise, the agent would have immediately seen: "Theme object structure (CRITICAL)" and applied it correctly. The Delta Principle ensures the agent's attention is spent only on what it doesn't already know.
 
+#### Context Budget Thinking
+
+**Extension to Delta Principle:** Treat the context window as a finite budget, not an infinite resource.
+
+**The Context Budget Framework:**
+- Context window = Limited tokens (e.g., 200k for Claude 3 Opus)
+- Every token spent on obvious knowledge = Token not spent on reasoning
+- Signal-to-noise ratio is the critical performance metric
+
+**Budget Allocation Priority:**
+1. Task objective (highest priority)
+2. Critical constraints (must-have)
+3. Relevant context (supporting info)
+4. Tool definitions (only essential)
+5. Nice-to-have instructions (lowest priority—often omitted)
+
+**Connection to Less is More:**
+The Delta Principle (remove obvious knowledge) combined with Context Budget Thinking (allocate tokens strategically) creates high-signal, minimal components. See [07-less-is-more.md](07-less-is-more.md) for the research foundation on context poisoning and token efficiency.
+
 #### Continuous Iteration
 
 **[COMMUNITY] Evolving CLAUDE.md Through Usage**
@@ -201,6 +221,93 @@ Some engineers have Claude maintain a `notes/` directory for every task/project,
 3. Easy migration of proven rules to CLAUDE.md
 
 **Key**: CLAUDE.md is a living document. The best CLAUDE.md files have been refined through dozens of real usage sessions.
+
+---
+
+### Philosophy: Less is More
+
+[FINDING] Research-Based Optimization
+
+**Source:** See [07-less-is-more.md](07-less-is-more.md) for comprehensive research and methodology
+
+**Core Principle:** Optimization of AI agents is not a race toward complexity but a pursuit of elegant simplicity. Research consistently shows that simpler systems outperform complex ones.
+
+#### Key Research Findings
+
+| Research Area | Key Finding | Source |
+|:--------------|:------------|:-------|
+| **Tool Overload** | Precision drops from 78% (10 tools) to 13% (100+ tools) | [Berkowitz, 2024](https://joshuaberkowitz.us/blog/news-1/solving-tool-overload-in-ai-agents-with-semantic-selection-1735) |
+| **Context Poisoning** | Full history (~113k tokens) degrades accuracy ~30% vs targeted context (~300 tokens) | [Chroma Research, 2024](https://blog.promptlayer.com/why-llms-get-distracted-and-how-to-write-shorter-prompts) |
+| **Prompt Complexity** | Simple prompts often outperform complex structured ones for modern models | [1500 Papers Meta-Analysis](https://aakashgupta.medium.com/i-studied-1-500-academic-papers-on-prompt-engineering-heres-why-everything-you-know-is-wrong-2fc97c1735a7) |
+| **Anthropic Agents** | "Most effective implementations were the simplest that could solve the problem" | [Anthropic Research, 2024](https://www.anthropic.com/research/building-effective-agents) |
+
+#### The "Nécessaire et Suffisant" Framework
+
+```markdown
+❌ Complex Approach (Avoid)
+- 15+ tools loaded simultaneously
+- 50+ line structured prompts
+- Multiple agent hierarchies
+- Preemptive handling of all edge cases
+
+✅ "Less is More" Approach
+- 3-5 essential tools per task
+- 1-3 line prompts when possible
+- Flat architecture when sufficient
+- Reactive constraints (add only after observing failures)
+```
+
+#### Practical Guidelines
+
+**Toolkit Focus:**
+- **Essential tools:** 3-5 tools covering 80% of use cases
+- **Specialized tools:** 2-3 for domain-specific needs  
+- **Contextual tools:** Loaded dynamically based on task
+
+**Prompt Minimalism Patterns:**
+
+| Pattern | Structure | Best For |
+|:--------|:----------|:---------|
+| **Direct Intent** | Single line | Simple, well-understood tasks |
+| **Intent + Context + Constraints** | 3 lines | Tasks requiring background |
+| **Objective + Success Criteria** | 2-3 lines | Complex tasks with clear completion |
+| **Natural Language Delegation** | Paragraph | Tasks requiring autonomy |
+
+**Component Guidelines:**
+
+| Component | Target Size | Key Principle |
+|:----------|:------------|:--------------|
+| **Skills** | 20-50 lines initially | Use "What I do / When to use me" pattern |
+| **Commands** | Single responsibility | Avoid branching unless necessary |
+| **Agents** | 1 primary + 2-3 sub-agents | Flat architecture preferred |
+
+#### When Simplicity Wins vs Structure Needed
+
+**Simplicity Wins:**
+- Discovery and exploration tasks
+- Requirements gathering
+- Code review and analysis
+- One-off coding tasks
+- Brainstorming and ideation
+
+**Structure Needed:**
+- Repeatable workflows with predefined outputs
+- System integrations (CRMs, support platforms)
+- Production-critical systems
+- Safety-critical operations
+
+#### The Iterative Workflow
+
+```
+Objective → Simple Prompt (1-3 lines) → Observe Results
+    ↑                                  ↓
+    └─────── Add 1 targeted line ←── Errors?
+              if needed
+```
+
+**Principle:** Start with minimal prompts, add complexity only when observing specific failure modes. Avoid preemptive structuring for hypothetical edge cases.
+
+**Reference:** See [07-less-is-more.md](07-less-is-more.md) for complete methodology, research citations, and implementation examples.
 
 ---
 
@@ -649,6 +756,10 @@ This creates a **closed feedback loop** where the verifier references the origin
 | **Consistent Multi-Skill Worker** | Loadout Agent | Bundled capabilities, explicit manifest |
 | **Task + Capabilities** | Composition Pattern | Workflow + capability bundle |
 | **Dynamic Routing** | Dispatcher Pattern | Self-optimizing agentic loop |
+| **Discovery Tasks** | Simple Natural Language | Adapts organically; see [07-less-is-more.md](07-less-is-more.md) |
+| **Predefined Workflows** | Structured Prompts | Consistency for repeatable outputs |
+| **One-off Coding** | Minimal Prompt (1-3 lines) | Modern models need less micromanagement |
+| **Toolkit Efficiency** | 3-5 Essential Tools | Tool overload kills precision; see [07-less-is-more.md](07-less-is-more.md) |
 
 ---
 

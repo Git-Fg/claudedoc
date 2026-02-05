@@ -295,6 +295,65 @@ Continue this one-question-at-a-time process until you have enough detail to wri
 
 ---
 
+**[FINDING] The Art of the One-Liner**
+
+Research and community practice demonstrate that simple prompts often outperform complex structured ones for modern models (Claude 4+, GPT-4.1+). See [07-less-is-more.md](07-less-is-more.md) for complete research foundation.
+
+**When One-Liners Work Best:**
+
+| Scenario | Example |
+|:---------|:--------|
+| **Simple coding tasks** | "Calcule la moyenne d'une liste de nombres en Python" |
+| **File operations** | "Find all TODO comments in the codebase" |
+| **Refactoring** | "Refactor this function to use async/await" |
+| **Documentation** | "Document this API endpoint following our OpenAPI pattern" |
+
+**Prompt Minimalism Patterns:**
+
+**Pattern 1: Direct Intent (1 line)**
+```javascript
+// ❌ Over-specified
+"Écris une fonction Python qui calcule la moyenne d'une liste de nombres, 
+en utilisant une approche fonctionnelle avec des lambda, 
+en gérant les cas d'erreur, avec une documentation complète, 
+en suivant PEP8, et en retournant None si la liste est vide"
+
+// ✅ Simple and effective
+"Calcule la moyenne d'une liste de nombres en Python"
+```
+
+**Pattern 2: Intent + Context + Constraints (3 lines)**
+```markdown
+Goal: Ajoute l'endpoint POST /users avec validation email/password
+Context: API REST FastAPI avec SQLAlchemy, repo dans ./app
+Constraints: Ne touche pas aux migrations, utilise les modèles existants
+```
+
+**Pattern 3: Objective + Success Criteria**
+```markdown
+Objective: Implement user authentication with JWT tokens
+Success Criteria:
+- Returns token on valid credentials (200)
+- Returns 401 on invalid credentials
+- Follows existing error handling patterns in auth/
+```
+
+**Why Simple Prompts Beat Complex Ones:**
+
+1. **Budget d'attention fini** - LLMs have limited attention budgets. More tokens = less capacity to focus on what matters.
+2. **Moins de distracteurs** - Even a few irrelevant "distractors" can kill performance completely.
+3. **Confiance implicite** - Modern models already know best practices. Over-specifying limits their ability to choose optimal approaches.
+4. **Moins de contraintes = plus de liberté** - Micromanaging each step prevents the model from adapting to context.
+
+**Research Evidence:**
+- Context poisoning: Full chat history (~113k tokens) degrades accuracy ~30% vs targeted context (~300 tokens)
+- Tool overload: Precision drops from 78% (10 tools) to 13% (100+ tools)
+- Academic synthesis: 1,500+ papers conclude short, dense prompts outperform verbose ones
+
+See [07-less-is-more.md](07-less-is-more.md) Section 6 for comprehensive patterns and research citations.
+
+---
+
 **[COMMUNITY] Positive Constraints**
 
 **Principle**: "Do this" not "Don't do that."
@@ -790,6 +849,44 @@ The more specific your spec, the better the output. Ambiguity in requirements pr
 ---
 
 ### Component Quality
+
+**[FINDING] Minimalism Checklist - Before Creating Components**
+
+Before adding complexity, verify you need it. Research shows over-engineering is the primary cause of agent failures.
+
+**Check Before Creating:**
+
+- [ ] **Can this be solved with a simple prompt?** (1-3 lines)
+- [ ] **Do I really need an agent, or would a workflow suffice?**
+- [ ] **Have I tested the simple version first?**
+- [ ] **Am I adding structure for hypothetical edge cases?**
+
+**Check Before Adding Tools:**
+
+- [ ] **Is each tool used at least 80% of the time?**
+- [ ] **Can I use fewer tools with richer parameters?**
+- [ ] **Does my toolkit exceed 10 tools?** (Precision drops beyond this)
+
+**Check Before Writing Skills/Commands:**
+
+- [ ] **Target size: 20-50 lines initially** (expand only when needed)
+- [ ] **Am I stating objectives or procedures?** (Prefer objectives)
+- [ ] **Does this duplicate existing patterns?**
+- [ ] **Is the description spoiling the body content?**
+
+**Red Flags of Over-Engineering:**
+
+| Symptom | Likely Cause | Solution |
+|:--------|:-------------|:---------|
+| Agent seems paralyzed | Over-constraining | Remove rigid steps, provide objectives |
+| Context always full | Bloated instructions | Centralize persistent rules in CLAUDE.md |
+| Can't find information | Scattered references | Put core knowledge in SKILL.md |
+| Descriptions are verbose | Spoiling content | Use What-When-Not pattern |
+| Using "magic syntax" | Over-structuring | Use natural language |
+
+**Reference:** See [07-less-is-more.md](07-less-is-more.md) Section 12 for complete over-engineering checklist and research.
+
+---
 
 **[COMMUNITY] Component Quality Checklist**
 
@@ -1418,6 +1515,32 @@ Adapt these steps as needed for your use case.
 ```
 
 **Key Principle**: > **2026 Research**: Over-constraining agents causes more failures than under-constraining.
+
+**Research Foundation:**
+
+This principle is supported by multiple research streams:
+
+1. **Anthropic's Agent Research**: "The most effective implementations were not the most complex, but the simplest that could solve the problem"[^1]
+
+2. **Academic Meta-Analysis**: Synthesis of 1,500+ papers on prompt engineering concludes that short, well-structured prompts outperform verbose ones[^2]
+
+3. **Community Consensus**: Reddit discussion with 92 upvotes states "Over-engineering is poison for AI agents. Greater stability arises from minimizing the number of components rather than complicating them."[^3]
+
+4. **Context Engineering**: Research shows that targeted context (~300 tokens) outperforms full history (~113k tokens) by ~30% accuracy[^4]
+
+**Practical Implication:**
+Modern models (Claude 4+, GPT-4.1+) are instruction-following machines. They read what you write and execute faithfully. Over-constraint causes rigidity failure—when you script every step, the agent cannot adapt when reality diverges from the script.
+
+See [07-less-is-more.md](07-less-is-more.md) Section 3 for complete 2026 paradigm shift analysis.
+
+---
+
+**References:**
+
+[^1]: Anthropic Research, "Building Effective Agents" (2024). https://www.anthropic.com/research/building-effective-agents
+[^2]: Aakash Gupta, "I Studied 1,500 Academic Papers on Prompt Engineering" (2024). https://aakashgupta.medium.com/i-studied-1-500-academic-papers-on-prompt-engineering-heres-why-everything-you-know-is-wrong-2fc97c1735a7
+[^3]: Reddit r/AI_Agents, "Are we overengineering agents?" (2024). https://www.reddit.com/r/AI_Agents/comments/1ph5m9c/are_we_overengineering_agents_when_simple_systems/
+[^4]: Chroma Research, "Context Rot" (2024). https://blog.promptlayer.com/why-llms-get-distracted-and-how-to-write-shorter-prompts
 
 **When Strong Language is NOT Micromanagement**:
 

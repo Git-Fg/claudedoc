@@ -143,6 +143,121 @@ hooks:                        # Optional: event-driven automation
 
 SKILL.md serves as an overview that points Claude to detailed materials as needed—like a table of contents in an onboarding guide. Keep SKILL.md under 500 lines for optimal performance.
 
+---
+
+**[FINDING] Skill Conciseness Guidelines**
+
+Research shows that skill size and structure directly impact agent performance. See [07-less-is-more.md](07-less-is-more.md) for complete research foundation.
+
+**Target Specifications:**
+
+| Aspect | Simple Skill | Complex Skill |
+|:-------|:-------------|:--------------|
+| **Length** | 20-50 lines | 100+ lines |
+| **Structure** | Natural language guidelines | Step-by-step enforcement |
+| **Best For** | Discovery, heuristics, patterns | Validation, strict workflows |
+| **Tools** | 3-5 essential | Dynamically selected |
+
+**Why Conciseness Matters:**
+
+- **Context Poisoning**: Every line competes for attention with other context
+- **Research Evidence**: Adding full chat history (~113k tokens) degrades accuracy ~30% vs targeted context (~300 tokens)
+- **Anthropic Guidance**: "Concise is key—each token in SKILL.md shares the context window with the prompt, history, and other skills"
+
+**The "What I Do / When to Use Me" Pattern:**
+
+Optimal skill structure based on production experience:
+
+```yaml
+---
+name: fastapi-crud-conventions
+description: Follow our FastAPI CRUD patterns
+---
+
+## What I do
+- Use `router.prefix` for resource routes
+- Expose only `/items/{id}` and `/items/` endpoints unless explicit requirement
+- Always validate with Pydantic V2 models
+- Return 404 if not found, 422 for validation errors
+
+## When to use me
+Use for any new CRUD route or DTO.
+Ask if pagination/search is required before implementing.
+```
+
+**Characteristics of optimal skills:**
+- Ultra-concise (~20 lines)
+- Clear value proposition
+- Precise trigger conditions
+- Defers to agent judgment on edge cases
+
+---
+
+**[FINDING] Dynamic Tool Selection**
+
+Research shows tool overload significantly degrades performance[^1]. Precision drops from 78% with 10 tools to 13% with 100+ tools.
+
+**The 3-5 Essential Tools Rule:**
+
+**❌ Bad Practice - Static Loading:**
+```typescript
+// Loading 20+ tools simultaneously
+const tools = [tool1, tool2, ..., tool20];
+```
+
+**✅ Good Practice - Dynamic Selection:**
+```typescript
+// Select 3-5 relevant tools based on task
+const relevantTools = await selectToolsForTask(userQuery);
+```
+
+**Tool Loading Strategy:**
+
+| Tier | Tool Count | Loading Strategy |
+|:-----|:-----------|:-----------------|
+| **Essential** | 3-5 tools | Statically loaded (used 80%+ of time) |
+| **Specialized** | 2-3 tools | Loaded per workflow/domain |
+| **Contextual** | Variable | Dynamically selected per task |
+
+**Implementation Example:**
+
+```yaml
+---
+name: processing-pdfs
+description: Extract text from PDF documents
+allowed-tools: Read, Write, Bash  # Only essential tools
+---
+
+## What I do
+Extract text from PDF files using pdfplumber.
+
+## Tools I use
+- Read: Load PDF files
+- Write: Save extracted text
+- Bash: Run pdfplumber commands
+
+## When to use me
+Use for text extraction from standard PDFs.
+For image-based PDFs, use OCR skill instead.
+```
+
+**MCP Server Best Practices:**
+
+For MCP servers[^2]:
+1. **Fewer tools + richer parameters** - Prefer polymorphic tools
+2. **Trim response payloads** - Reduce JSON verbosity
+3. **Stable tool lists** - Don't change available tools mid-session
+4. **Actionable errors** - Help models self-correct
+
+See [07-less-is-more.md](07-less-is-more.md) Section 5 for complete toolkit focus strategy.
+
+---
+
+**References:**
+
+[^1]: Joshua Berkowitz, "Solving Tool Overload in AI Agents" (2024). https://joshuaberkowitz.us/blog/news-1/solving-tool-overload-in-ai-agents-with-semantic-selection-1735
+[^2]: MCP Server Efficiency Presentation (2024). https://www.youtube.com/watch?v=eOMq4suzl3U
+
 **[FINDING]** Reference File Structure
 
 Keep references one level deep from SKILL.md:
@@ -469,6 +584,55 @@ Specialized agent skills:
 - Runs tests in isolated dev environment
 - Compares dev vs. prod results
 
+---
+
+**[FINDING] The Less is More Approach to Skill Creation**
+
+Complementing the frequency-based rule above, adopt a minimalist approach to skill design:
+
+**The Iterative Workflow:**
+
+```
+1. Start with a simple paragraph describing intent
+2. Test and observe results
+3. Add complexity only if specific failures occur
+4. Capture as skill only when pattern repeats and proves valuable
+```
+
+**Why Minimalism Wins:**
+
+| Approach | Outcome |
+|:---------|:--------|
+| **Preemptive Complexity** | Skills with 200+ lines for hypothetical edge cases that rarely occur |
+| **Iterative Minimalism** | 20-50 line skills that solve real, observed problems |
+
+**Research Evidence:**
+
+- **Academic synthesis**: 1,500+ papers conclude short, dense prompts outperform verbose ones[^1]
+- **Community consensus**: "Over-engineering is poison for AI agents"[^2]
+- **Anthropic research**: "Most effective implementations were the simplest that could solve the problem"[^3]
+
+**Practical Application:**
+
+Instead of creating a comprehensive skill upfront:
+
+```markdown
+❌ Don't: Create 200-line skill covering every PDF edge case
+
+✅ Do: Start with simple prompt:
+"Extract text from this PDF using pdfplumber"
+
+Then: 
+- Test on 5-10 real PDFs
+- Observe actual failure modes
+- Add only constraints for observed issues
+- Capture as 20-30 line skill when pattern stabilizes
+```
+
+See [07-less-is-more.md](07-less-is-more.md) Section 7 for complete component minimalism guidelines.
+
+---
+
 **Why This Matters**:
 
 Every manual repetition is a candidate for automation. The Claude Code team's approach:
@@ -478,6 +642,12 @@ Every manual repetition is a candidate for automation. The Claude Code team's ap
 4. **Iterate** skill based on usage
 
 **Key**: Skills compound—each new skill makes all future work faster.
+
+**References:**
+
+[^1]: Aakash Gupta, "I Studied 1,500 Academic Papers on Prompt Engineering" (2024). https://aakashgupta.medium.com/i-studied-1-500-academic-papers-on-prompt-engineering-heres-why-everything-you-know-is-wrong-2fc97c1735a7
+[^2]: Reddit r/AI_Agents, "Are we overengineering agents?" (2024). https://www.reddit.com/r/AI_Agents/comments/1ph5m9c/are_we_overengineering_agents_when_simple_systems/
+[^3]: Anthropic Research, "Building Effective Agents" (2024). https://www.anthropic.com/research/building-effective-agents
 
 ---
 
@@ -573,5 +743,7 @@ Use Manager Pattern: `Task(work)` + `Skill(auditor, context: fork)` with automat
 - Output format must be strictly consistent
 - Multiple validation phases are required
 - Safety depends on explicit checks
+
+**Reference:** See [07-less-is-more.md](07-less-is-more.md) for research foundation on why simple prompts often outperform complex ones, and complete methodology for iterative minimalism.
 
 **Source**: skills.md lines 137-152
